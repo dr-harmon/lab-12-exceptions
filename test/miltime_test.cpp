@@ -37,3 +37,25 @@ TEST_CASE("Standard time is converted correctly from military time") {
     REQUIRE(time4.getMeridian() == PM);
     REQUIRE(time4.getMilitaryHour() == 13);
 }
+
+TEST_CASE("Standard time constructor checks for bad parameters") {
+    REQUIRE_NOTHROW(Time(1, 0, AM));
+    REQUIRE_NOTHROW(Time(12, 59, PM));
+    REQUIRE_THROWS_AS(Time(0, 0, AM), BadParameterException<int>);
+    REQUIRE_THROWS_AS(Time(13, 0, AM), BadParameterException<int>);
+    REQUIRE_THROWS_AS(Time(1, -1, AM), BadParameterException<int>);
+    REQUIRE_THROWS_AS(Time(13, 0, AM), BadParameterException<int>);
+    REQUIRE_THROWS_AS(Time(12, 60, AM), BadParameterException<int>);
+}
+
+TEST_CASE("Military time constructor checks for bad parameters") {
+    REQUIRE_NOTHROW(Time(0, 45));
+    REQUIRE_NOTHROW(Time(1, 0));
+    REQUIRE_NOTHROW(Time(12, 45));
+    REQUIRE_NOTHROW(Time(13, 45));
+    REQUIRE_NOTHROW(Time(23, 45));
+    REQUIRE_THROWS_AS(Time(-1, 0), BadParameterException<int>);
+    REQUIRE_THROWS_AS(Time(24, 0), BadParameterException<int>);
+    REQUIRE_THROWS_AS(Time(11, -1), BadParameterException<int>);
+    REQUIRE_THROWS_AS(Time(11, 60), BadParameterException<int>);
+}

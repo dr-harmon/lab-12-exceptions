@@ -1,5 +1,21 @@
 #pragma once
 
+template <typename T>
+class BadParameterException {
+    T badParameter;
+    T minimum;
+    T maximum;
+public:
+    BadParameterException(T badParameter, T minimum, T maximum) {
+        this->badParameter = badParameter;
+        this->minimum = minimum;
+        this->maximum = maximum;
+    }
+    T getBadParameter() const { return badParameter; }
+    T getMinimum() const { return minimum; }
+    T getMaximum() const { return maximum; }
+};
+
 enum Meridian {
     AM, PM
 };
@@ -16,13 +32,22 @@ private:
             return militaryHour - 12;
         }
     }
+    void checkParam(int param, int min, int max) {
+        if (param < min || param > max) {
+            throw BadParameterException(param, min, max);
+        }
+    }
 public:
     Time(int hour, int minute, Meridian meridian) {
+        checkParam(hour, 1, 12);
+        checkParam(minute, 0, 59);
         this->hour = hour;
         this->minute = minute;
         this->meridian = meridian;
     }
     Time(int militaryHour, int minute) {
+        checkParam(militaryHour, 0, 23);
+        checkParam(minute, 0, 59);
         this->hour = getStandardHour(militaryHour);
         this->minute = minute;
         this->meridian = militaryHour < 12 ? AM : PM;
