@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 template <typename T>
 class BadParameterException {
     T badParameter;
@@ -14,6 +16,22 @@ public:
     T getBadParameter() const { return badParameter; }
     T getMinimum() const { return minimum; }
     T getMaximum() const { return maximum; }
+};
+
+template <typename T>
+class BadNamedParameterException : public BadParameterException<T> {
+    std::string name;
+public:
+    BadNamedParameterException(T badParameter, T minimum, T maximum, std::string name)
+        : BadParameterException<T>(badParameter, minimum, maximum) {
+        this->name = name;
+    }
+    std::string getDescription() const {
+        return "Argument " + name + " must be between "
+            + std::to_string(this->getMinimum()) + " and "
+            + std::to_string(this->getMaximum()) + " (got "
+            + std::to_string(this->getBadParameter()) + ")";
+    }
 };
 
 enum Meridian {
@@ -32,22 +50,22 @@ private:
             return militaryHour - 12;
         }
     }
-    void checkParam(int param, int min, int max) {
+    void checkParam(int param, int min, int max, std::string paramName) {
         if (param < min || param > max) {
-            throw BadParameterException(param, min, max);
+            throw BadNamedParameterException(param, min, max, paramName);
         }
     }
 public:
     Time(int hour, int minute, Meridian meridian) {
-        checkParam(hour, 1, 12);
-        checkParam(minute, 0, 59);
+        checkParam(hour, 1, 12, "hour");
+        checkParam(minute, 0, 59, "minute");
         this->hour = hour;
         this->minute = minute;
         this->meridian = meridian;
     }
     Time(int militaryHour, int minute) {
-        checkParam(militaryHour, 0, 23);
-        checkParam(minute, 0, 59);
+        checkParam(militaryHour, 0, 23, "militaryHour");
+        checkParam(minute, 0, 59, "minute");
         this->hour = getStandardHour(militaryHour);
         this->minute = minute;
         this->meridian = militaryHour < 12 ? AM : PM;
